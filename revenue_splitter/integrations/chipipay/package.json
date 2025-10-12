@@ -1,0 +1,27 @@
+{
+  "name": "revenue-splitter-chipipay",
+  "version": "1.0.0",
+  "description": "ChipiPay integration for RevenueSplitter contract",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "deposit": "node scripts/deposit.js",
+    "distribute": "node scripts/distribute.js",
+    "setup": "npm install"
+  },
+  "keywords": [
+    "starknet",
+    "chipipay",
+    "revenue-splitter",
+    "payments"
+  ],
+  "dependencies": {
+    "starknet": "^6.11.0",
+    "dotenv": "^16.4.5",
+    "axios": "^1.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0"
+  }
+}
+

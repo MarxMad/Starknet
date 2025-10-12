@@ -1,0 +1,23 @@
+{
+  "recipients": [
+    {
+      "name": "Equipo de Desarrollo",
+      "address": "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "shares": "50",
+      "description": "50% para el equipo de desarrollo"
+    },
+    {
+      "name": "Marketing",
+      "address": "0x0fedcba9876543210fedcba9876543210fedcba9876543210fedcba987654321",
+      "shares": "30",
+      "description": "30% para marketing"
+    },
+    {
+      "name": "Operaciones",
+      "address": "0x0abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678",
+      "shares": "20",
+      "description": "20% para operaciones"
+    }
+  ]
+}
+
