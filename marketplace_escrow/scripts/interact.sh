@@ -32,11 +32,11 @@ case $COMMAND in
         echo "🛒 Creando orden..."
         echo "   Seller: $3"
         echo "   Amount: $4"
-        sncast --profile sepolia invoke \
+        sncast --account sepolia invoke \
             --contract-address "$CONTRACT_ADDRESS" \
             --function create_order \
             --calldata "$3" "$4" 0 \
-            --max-fee auto
+            --network sepolia
         ;;
     
     complete_order)
@@ -46,11 +46,11 @@ case $COMMAND in
             exit 1
         fi
         echo "✅ Completando orden $3..."
-        sncast --profile sepolia invoke \
+        sncast --account sepolia invoke \
             --contract-address "$CONTRACT_ADDRESS" \
             --function complete_order \
             --calldata "$3" 0 \
-            --max-fee auto
+            --network sepolia
         ;;
     
     cancel_order)
@@ -60,11 +60,11 @@ case $COMMAND in
             exit 1
         fi
         echo "❌ Cancelando orden $3..."
-        sncast --profile sepolia invoke \
+        sncast --account sepolia invoke \
             --contract-address "$CONTRACT_ADDRESS" \
             --function cancel_order \
             --calldata "$3" 0 \
-            --max-fee auto
+            --network sepolia
         ;;
     
     dispute_order)
@@ -74,11 +74,11 @@ case $COMMAND in
             exit 1
         fi
         echo "⚖️ Disputando orden $3..."
-        sncast --profile sepolia invoke \
+        sncast --account sepolia invoke \
             --contract-address "$CONTRACT_ADDRESS" \
             --function dispute_order \
             --calldata "$3" 0 \
-            --max-fee auto
+            --network sepolia
         ;;
     
     resolve_dispute)
@@ -89,11 +89,11 @@ case $COMMAND in
         fi
         echo "⚖️ Resolviendo disputa de orden $3..."
         echo "   Liberar a seller: $4"
-        sncast --profile sepolia invoke \
+        sncast --account sepolia invoke \
             --contract-address "$CONTRACT_ADDRESS" \
             --function resolve_dispute \
             --calldata "$3" 0 "$4" \
-            --max-fee auto
+            --network sepolia
         ;;
     
     get_order)
@@ -103,10 +103,11 @@ case $COMMAND in
             exit 1
         fi
         echo "📊 Consultando orden $3..."
-        sncast --profile sepolia call \
+        sncast call \
             --contract-address "$CONTRACT_ADDRESS" \
             --function get_order \
-            --calldata "$3" 0
+            --calldata "$3" 0 \
+            --network sepolia
         ;;
     
     get_user_orders)
@@ -116,18 +117,19 @@ case $COMMAND in
             exit 1
         fi
         echo "📊 Consultando órdenes del usuario $3..."
-        sncast --profile sepolia call \
+        sncast call \
             --contract-address "$CONTRACT_ADDRESS" \
             --function get_user_orders \
-            --calldata "$3"
+            --calldata "$3" \
+            --network sepolia
         ;;
     
     withdraw_fees)
         echo "💰 Retirando comisiones acumuladas..."
-        sncast --profile sepolia invoke \
+        sncast --account sepolia invoke \
             --contract-address "$CONTRACT_ADDRESS" \
             --function withdraw_fees \
-            --max-fee auto
+            --network sepolia
         ;;
     
     *)
@@ -145,4 +147,5 @@ case $COMMAND in
         exit 1
         ;;
 esac
+
 

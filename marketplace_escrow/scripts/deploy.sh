@@ -36,9 +36,10 @@ echo "   Owner: $OWNER_ADDRESS"
 echo "   Fee Percent: $FEE_PERCENT%"
 echo ""
 
-sncast --profile sepolia deploy \
+sncast --account sepolia deploy \
     --class-hash "$CLASS_HASH" \
-    --constructor-calldata "$OWNER_ADDRESS" "$FEE_PERCENT" 0
+    --constructor-calldata "$OWNER_ADDRESS" "$FEE_PERCENT" 0 \
+    --network sepolia
 
 if [ $? -eq 0 ]; then
     echo ""

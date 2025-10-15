@@ -39,7 +39,46 @@ scarb test
 
 ### 2. Marketplace Escrow 🛒
 
-Contrato de escrow para marketplace (en desarrollo).
+Sistema de escrow seguro para marketplace descentralizado en Starknet.
+
+**Características:**
+- ✅ Escrow con protección buyer/seller
+- ✅ Sistema de órdenes completo
+- ✅ Resolución de disputas
+- ✅ Comisiones de plataforma configurables
+- ✅ Matemática segura con u256
+- ✅ 7 tests pasando (100%)
+- ✅ **Desplegado en Sepolia** 🎉
+
+**Contrato Desplegado:**
+- **Address**: `0x05f3ad89fe8115a281dcde06e2578123bc711dee7d2b650a830fec21f27bea8a`
+- **Network**: Starknet Sepolia
+- **Explorer**: [Ver en Starkscan](https://sepolia.starkscan.co/contract/0x05f3ad89fe8115a281dcde06e2578123bc711dee7d2b650a830fec21f27bea8a)
+
+**Documentación:**
+- [README Principal](./marketplace_escrow/README.md)
+- [Guía de Despliegue Completa](./marketplace_escrow/DEPLOYMENT.md)
+
+**Uso rápido:**
+```bash
+cd marketplace_escrow
+
+# Compilar
+scarb build
+
+# Ejecutar tests
+scarb test
+
+# Interactuar con el contrato desplegado
+./scripts/interact.sh <CONTRACT_ADDRESS> <COMANDO> [ARGS]
+
+# Ejemplo: Crear una orden
+./scripts/interact.sh \
+    0x05f3ad89fe8115a281dcde06e2578123bc711dee7d2b650a830fec21f27bea8a \
+    create_order \
+    <SELLER_ADDRESS> \
+    1000
+```
 
 ## 🛠️ Tecnologías
 
@@ -110,4 +149,5 @@ Desarrollado para el Starknet Hackathon 2025.
 ---
 
 ⭐ Si te gusta este proyecto, dale una estrella en GitHub!
+
 
