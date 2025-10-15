@@ -386,6 +386,58 @@ Este es un proyecto open-source. Las contribuciones son bienvenidas!
 
 ---
 
+---
+
+## 🎉 UTONOMA Desplegado en Sepolia!
+
+### ✅ Contratos en Producción (Testnet)
+
+**VersyToken (ERC20)** 💎
+- **Address:** `0x054f4e457ed13667ccfd2076d66d696e410690fe2bd5378a660991389e0b729a`
+- **Class Hash:** `0x024532c30df18fd1b2e08934eae014a2981a1704e27bd4f94d1e27ae3b4fb853`
+- **Total Supply:** 1,000,000,000 VERSY
+- 🔗 [Ver en Starkscan](https://sepolia.starkscan.co/contract/0x054f4e457ed13667ccfd2076d66d696e410690fe2bd5378a660991389e0b729a)
+
+**UTONOMA Platform** 🎬
+- **Address:** `0x0102f741c538504da4d69f49358d218a3e5c09b44d3177a562c74c6bab2a3f6f`
+- **Class Hash:** `0x065e881a42cbc3ee8f6e215e1ed13fb6e698aa56351e2b22e7053c97fa83d764`
+- **Token:** VersyToken (arriba)
+- 🔗 [Ver en Starkscan](https://sepolia.starkscan.co/contract/0x0102f741c538504da4d69f49358d218a3e5c09b44d3177a562c74c6bab2a3f6f)
+
+**Owner/Deployer:** `0x03b388717af214746822e3dffaeb42976428e360bcdfbd26c327e870d154aad1`
+
+### 🚀 Interactuar con los Contratos
+
+```bash
+# Variables de entorno
+export TOKEN_ADDRESS=0x054f4e457ed13667ccfd2076d66d696e410690fe2bd5378a660991389e0b729a
+export PLATFORM_ADDRESS=0x0102f741c538504da4d69f49358d218a3e5c09b44d3177a562c74c6bab2a3f6f
+
+# Ver balance de VERSY
+sncast call \
+  --contract-address $TOKEN_ADDRESS \
+  --function balance_of \
+  --calldata <USER_ADDRESS> \
+  --network sepolia
+
+# Subir un video
+sncast --account=sepolia invoke \
+  --contract-address $PLATFORM_ADDRESS \
+  --function upload_video \
+  --calldata <IPFS_HASH> <TITLE> \
+  --network sepolia
+
+# Ver todos los videos
+sncast call \
+  --contract-address $PLATFORM_ADDRESS \
+  --function get_all_videos \
+  --network sepolia
+```
+
+**📖 Documentación completa:** [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+---
+
 ## 📝 Licencia
 
 Desarrollado para el **Starknet Hackathon 2025**.
