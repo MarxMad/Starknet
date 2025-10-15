@@ -1,43 +1,10 @@
-# 🚀 Starknet Hackathon - Contratos Inteligentes
+# 🚀 Starknet Hackathon - Marketplace Escrow
 
-Repositorio con proyectos de contratos inteligentes en Cairo para Starknet, desarrollados durante el hackathon.
+Contrato inteligente de escrow para marketplace descentralizado en Starknet, desarrollado durante el hackathon.
 
-## 📦 Proyectos
+## 📦 Proyecto
 
-### 1. RevenueSplitter 💰
-
-Contrato inteligente para distribuir ingresos automáticamente entre múltiples receptores según sus participaciones.
-
-**Características:**
-- ✅ Matemática segura con u256
-- ✅ Control de acceso con OpenZeppelin Ownable
-- ✅ Distribución proporcional de fondos
-- ✅ Integración completa con ChipiPay
-- ✅ 4 tests pasando (100%)
-- ✅ Scripts de despliegue automatizados
-
-**Documentación:**
-- [README Principal](./revenue_splitter/README.md)
-- [Guía de Despliegue](./revenue_splitter/DEPLOYMENT.md)
-- [Quick Start](./revenue_splitter/QUICK_START.md)
-- [Integración ChipiPay](./revenue_splitter/integrations/chipipay/README.md)
-
-**Uso rápido:**
-```bash
-cd revenue_splitter
-
-# Compilar
-scarb build
-
-# Ejecutar tests
-scarb test
-
-# Desplegar
-./scripts/declare.sh
-./scripts/deploy.sh <CLASS_HASH> <OWNER>
-```
-
-### 2. Marketplace Escrow 🛒
+### Marketplace Escrow 🛒
 
 Sistema de escrow seguro para marketplace descentralizado en Starknet.
 
@@ -82,12 +49,11 @@ scarb test
 
 ## 🛠️ Tecnologías
 
-- **Cairo 1.0** - Lenguaje de smart contracts
+- **Cairo 2.11.4** - Lenguaje de smart contracts
 - **Starknet** - Layer 2 de Ethereum
 - **Scarb 2.11.4** - Build tool
 - **Starknet Foundry 0.44.0** - Testing framework
-- **OpenZeppelin** - Librerías de seguridad
-- **ChipiPay** - Procesamiento de pagos
+- **OpenZeppelin v0.20.0** - Librerías de seguridad
 
 ## 🚀 Inicio Rápido
 
@@ -105,24 +71,37 @@ curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scr
 
 ```bash
 git clone https://github.com/MarxMad/Starknet.git
-cd Starknet
-
-# Ir al proyecto que quieras usar
-cd revenue_splitter
+cd Starknet/marketplace_escrow
 
 # Compilar
 scarb build
 
 # Ejecutar tests
 scarb test
+
+# Interactuar con el contrato desplegado
+./scripts/interact.sh \
+    0x05f3ad89fe8115a281dcde06e2578123bc711dee7d2b650a830fec21f27bea8a \
+    get_order 1
 ```
 
 ## 📚 Documentación
 
-Cada proyecto tiene su propia documentación completa:
+Documentación completa del proyecto:
 
-- **RevenueSplitter**: Ver [revenue_splitter/README.md](./revenue_splitter/README.md)
-- **Marketplace Escrow**: Ver [marketplace_escrow/README.md](./marketplace_escrow/README.md)
+- **[README Principal](./marketplace_escrow/README.md)** - Guía completa del contrato y funcionalidades
+- **[Guía de Despliegue](./marketplace_escrow/DEPLOYMENT.md)** - Paso a paso para desplegar en Sepolia
+- **[Quick Reference](./marketplace_escrow/QUICK_REFERENCE.md)** - Comandos rápidos y ejemplos
+
+## 🎯 Casos de Uso
+
+El Marketplace Escrow es ideal para:
+
+- **🖼️ NFT Marketplaces** - Protección en compra/venta de NFTs
+- **💼 Servicios Freelance** - Garantía de pago por trabajo completado
+- **🛍️ E-commerce P2P** - Transacciones seguras entre particulares
+- **🎮 Gaming Assets** - Intercambio seguro de items en juegos
+- **📦 Productos Físicos** - Escrow para envíos y entregas
 
 ## 🔗 Enlaces Útiles
 
@@ -131,7 +110,7 @@ Cada proyecto tiene su propia documentación completa:
 - **Starknet Foundry**: https://foundry-rs.github.io/starknet-foundry/
 - **OpenZeppelin Cairo**: https://docs.openzeppelin.com/contracts-cairo/
 - **Sepolia Explorer**: https://sepolia.starkscan.co/
-- **Faucet**: https://starknet-faucet.vercel.app/
+- **Faucet**: https://blastapi.io/faucets/starknet-sepolia-eth
 
 ## 🤝 Contribuir
 
