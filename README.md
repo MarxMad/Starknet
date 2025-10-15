@@ -1,10 +1,52 @@
-# 🚀 Starknet Hackathon - Marketplace Escrow
+# 🚀 Starknet Hackathon - Smart Contracts
 
-Contrato inteligente de escrow para marketplace descentralizado en Starknet, desarrollado durante el hackathon.
+Colección de contratos inteligentes innovadores en Cairo para Starknet, desarrollados durante el hackathon.
 
-## 📦 Proyecto
+## 📦 Proyectos
 
-### Marketplace Escrow 🛒
+### 1. Versy Platform 📹 (NUEVO)
+
+Plataforma de videos descentralizada con recompensas en tokens por engagement.
+
+**Características:**
+- 🎥 Videos almacenados en IPFS (Pinata)
+- 💎 Token VERSY (ERC20) - 1 Billion supply
+- 👍 Sistema de likes con recompensas (67% creador / 33% plataforma)
+- 🎁 Welcome bonus: 150 VERSY para nuevos usuarios
+- 📊 Feed inteligente de videos
+- 🔐 Integración con wallets embebidas (ChipiPay)
+
+**Tokenomics:**
+- Total Supply: 1,000,000,000 VERSY
+- Early Adopters: 100M (10%)
+- Rewards Pool: 300M (30%)
+- Treasury: 200M (20%)
+- Ver roadmap completo: [VERSY_TOKENOMICS.md](./VERSY_TOKENOMICS.md)
+
+**Documentación:**
+- [README Principal](./versy_platform/README.md)
+- [Tokenomics Completo](./VERSY_TOKENOMICS.md)
+
+**Uso rápido:**
+```bash
+cd versy_platform
+
+# Compilar
+scarb build
+
+# Ejecutar tests
+scarb test
+
+# Upload un video
+./scripts/interact.sh <PLATFORM_ADDRESS> upload_video <IPFS_HASH> <TITLE>
+
+# Dar like a un video
+./scripts/interact.sh <PLATFORM_ADDRESS> like_video <VIDEO_ID>
+```
+
+---
+
+### 2. Marketplace Escrow 🛒
 
 Sistema de escrow seguro para marketplace descentralizado en Starknet.
 

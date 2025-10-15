@@ -1,0 +1,26 @@
+[package]
+name = "versy_platform"
+version = "0.1.0"
+edition = "2024_07"
+
+[dependencies]
+starknet = "2.11.4"
+openzeppelin_token = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.20.0" }
+openzeppelin_access = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.20.0" }
+
+[dev-dependencies]
+snforge_std = "0.44.0"
+assert_macros = "2.11.4"
+
+[[target.starknet-contract]]
+sierra = true
+casm = true
+
+[scripts]
+test = "snforge test"
+
+[tool.snforge]
+exit_first = false
+
+[tool.scarb]
+allow-prebuilt-plugins = ["snforge_std"]
