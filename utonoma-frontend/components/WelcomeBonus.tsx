@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Gift, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { useChipiWallet } from "@/hooks/useChipiWallet";
@@ -17,67 +17,60 @@ export function WelcomeBonus() {
   const [claiming, setClaiming] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+  const checkClaimed = useCallback(async () => {
+    if (!isConnected || !wallet || hasChecked) {
+      setChecking(false);
+      return;
+    }
+
+    let timeoutId: NodeJS.Timeout | undefined;
     let isMounted = true;
 
-    const checkClaimed = async () => {
-      if (!isConnected || !wallet || hasChecked) {
-        setChecking(false);
-        return;
-      }
-
-      try {
-        setChecking(true);
-        setHasChecked(true);
-        
-        // Timeout después de 3 segundos para evitar rate limiting
-        timeoutId = setTimeout(() => {
-          if (isMounted) {
-            console.log('⏰ Timeout verificando bonus - asumiendo no reclamado');
-            setClaimed(false);
-            setChecking(false);
-          }
-        }, 3000);
-
-        // Verificar si hay contrato configurado antes de hacer la llamada
-        if (!process.env.NEXT_PUBLIC_PLATFORM_ADDRESS || process.env.NEXT_PUBLIC_PLATFORM_ADDRESS === "") {
-          console.log('📝 No hay contrato configurado - modo demo');
-          if (isMounted) {
-            clearTimeout(timeoutId);
-            setClaimed(false);
-            setChecking(false);
-          }
-          return;
-        }
-
-        const hasClaimed = await hasClaimedWelcome(wallet.address);
-        
+    try {
+      setChecking(true);
+      setHasChecked(true);
+      
+      // Timeout después de 3 segundos para evitar rate limiting
+      timeoutId = setTimeout(() => {
         if (isMounted) {
-          clearTimeout(timeoutId);
-          setClaimed(hasClaimed);
-          setChecking(false);
-        }
-      } catch (err) {
-        console.error('Error verificando bonus:', err);
-        if (isMounted) {
-          clearTimeout(timeoutId);
-          // En caso de error, asumir que no está reclamado para permitir intentar
+          console.log('⏰ Timeout verificando bonus - asumiendo no reclamado');
           setClaimed(false);
           setChecking(false);
         }
-      }
-    };
+      }, 3000);
 
+      // Verificar si hay contrato configurado antes de hacer la llamada
+      if (!process.env.NEXT_PUBLIC_PLATFORM_ADDRESS || process.env.NEXT_PUBLIC_PLATFORM_ADDRESS === "") {
+        console.log('📝 No hay contrato configurado - modo demo');
+        if (isMounted) {
+          if (timeoutId) clearTimeout(timeoutId);
+          setClaimed(false);
+          setChecking(false);
+        }
+        return;
+      }
+
+      const hasClaimed = await hasClaimedWelcome(wallet.address);
+      
+      if (isMounted) {
+        if (timeoutId) clearTimeout(timeoutId);
+        setClaimed(hasClaimed);
+        setChecking(false);
+      }
+    } catch (err) {
+      console.error('Error verificando bonus:', err);
+      if (isMounted) {
+        if (timeoutId) clearTimeout(timeoutId);
+        // En caso de error, asumir que no está reclamado para permitir intentar
+        setClaimed(false);
+        setChecking(false);
+      }
+    }
+  }, [isConnected, wallet, hasChecked, hasClaimedWelcome]);
+
+  useEffect(() => {
     checkClaimed();
-
-    return () => {
-      isMounted = false;
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [isConnected, wallet?.address]);
+  }, [checkClaimed]);
 
   const handleClaim = async () => {
     if (!isConnected || !wallet) {

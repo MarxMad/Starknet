@@ -39,7 +39,7 @@ export function VideoFeed() {
       });
       
       const fetchPromise = async () => {
-        const contract = new Contract(platformAbi.abi, config.platformAddress);
+        const contract = new Contract(platformAbi.abi);
         
         // Get all video IDs
         const videoIds = await contract.get_all_videos();
