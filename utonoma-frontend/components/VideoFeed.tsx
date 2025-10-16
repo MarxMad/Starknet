@@ -5,7 +5,7 @@ import { useProvider } from "@starknet-react/core";
 import { VideoCard } from "@/components/VideoCard";
 import { Video } from "@/types";
 import { config } from "@/lib/config";
-import { Loader2, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { Contract } from "starknet";
 import platformAbi from "@/abis/platform.json";

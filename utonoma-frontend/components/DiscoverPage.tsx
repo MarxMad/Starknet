@@ -97,7 +97,7 @@ export function DiscoverPage() {
             gap: '0.75rem'
           }}
         >
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <motion.button
               key={category.name}
               whileHover={{ scale: 1.02 }}

@@ -3,14 +3,14 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
-import { Upload, X, CheckCircle, AlertCircle, Loader2, Video, FileText } from "lucide-react";
+import { Upload, X, CheckCircle, AlertCircle, Loader2, Video } from "lucide-react";
 import { useChipiWallet } from "@/hooks/useChipiWallet";
 import { useContract } from "@/hooks/useContract";
 import { shortString } from "starknet";
 
 export function VideoUpload() {
   const { wallet, isConnected } = useChipiWallet();
-  const { uploadVideo, isLoading, error: contractError } = useContract();
+  const { uploadVideo } = useContract();
   
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -19,7 +19,6 @@ export function VideoUpload() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [ipfsHash, setIpfsHash] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];

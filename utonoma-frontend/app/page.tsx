@@ -11,8 +11,8 @@ import { UserProfile } from "@/components/UserProfile";
 import { DiscoverPage } from "@/components/DiscoverPage";
 import { NotificationsPage } from "@/components/NotificationsPage";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Bell, User, Grid3x3, Video, TrendingUp, Users, BookOpen, Palette, Globe, Calculator, FlaskConical, Mail, Wallet } from "lucide-react";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Video, Mail, Wallet } from "lucide-react";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import Image from "next/image";
 
 export default function HomePage() {

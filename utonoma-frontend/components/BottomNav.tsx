@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Home, Search, Plus, Bell, User } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface BottomNavProps {
   activeView: "feed" | "upload" | "profile" | "search" | "notifications";
@@ -12,7 +12,6 @@ interface BottomNavProps {
 
 export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
   const { isSignedIn } = useUser();
-  const [showUploadMenu, setShowUploadMenu] = useState(false);
 
   if (!isSignedIn) return null;
 

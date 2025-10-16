@@ -2,13 +2,13 @@
 
 import { useUser, useClerk } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import { User, Settings, LogOut, Coins, Video, Heart, Wallet, CheckCircle, Loader2 } from "lucide-react";
+import { User, Settings, LogOut, Coins, Video, Wallet, CheckCircle, Loader2 } from "lucide-react";
 import { useChipiWallet } from "@/hooks/useChipiWallet";
 
 export function UserProfile() {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { wallet, isLoading, error, isConnected } = useChipiWallet();
+  const { wallet, isLoading, isConnected } = useChipiWallet();
 
   if (!user) return null;
 
