@@ -71,54 +71,59 @@ export function UserProfile() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div 
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '1rem'
-          }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <div 
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 700,
-                color: '#ffffff',
-                margin: 0
-              }}
-            >
-              0
-            </div>
-            <div style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>Videos</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div 
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 700,
-                color: '#ffffff',
-                margin: 0
-              }}
-            >
-              0
-            </div>
-            <div style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>Likes</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div 
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 700,
-                color: '#fbbf24',
-                margin: 0
-              }}
-            >
-              150
-            </div>
-            <div style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>VERSY</div>
-          </div>
-        </div>
+                {/* Stats */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '1rem'
+                  }}
+                >
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        margin: 0
+                      }}
+                    >
+                      0
+                    </div>
+                    <div style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>Videos</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        margin: 0
+                      }}
+                    >
+                      0
+                    </div>
+                    <div style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>Likes</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#fbbf24',
+                        margin: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.25rem'
+                      }}
+                    >
+                      <Coins className="w-5 h-5" />
+                      150
+                    </div>
+                    <div style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>VERSY</div>
+                  </div>
+                </div>
       </div>
 
       {/* Menu Options */}
@@ -235,139 +240,52 @@ export function UserProfile() {
           <span style={{ fontWeight: 500, color: '#ffffff' }}>Configuración</span>
         </motion.button>
 
-        {/* ChipiPay Wallet Info */}
-        <div 
-          style={{
-            background: isConnected 
-              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)'
-              : 'linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
-            borderRadius: '0.75rem',
-            padding: '1rem',
-            border: isConnected 
-              ? '1px solid rgba(16, 185, 129, 0.3)'
-              : '1px solid rgba(147, 51, 234, 0.3)',
-            backdropFilter: 'blur(8px)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            {isConnected ? (
-              <CheckCircle className="w-5 h-5" style={{ color: '#10b981' }} />
-            ) : isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#a855f7' }} />
-            ) : (
-              <Wallet className="w-5 h-5" style={{ color: '#a855f7' }} />
-            )}
-            <span style={{ fontWeight: 600, color: '#ffffff' }}>Wallet ChipiPay</span>
-          </div>
-          
-          {isConnected && wallet ? (
-            <>
-              <p 
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#10b981',
-                  marginBottom: '0.75rem',
-                  margin: 0,
-                  fontWeight: 500
-                }}
-              >
-                ✅ Wallet activa y lista para usar
-              </p>
-              <div 
-                style={{
-                  fontSize: '0.75rem',
-                  color: '#ffffff',
-                  fontFamily: 'monospace',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  wordBreak: 'break-all'
-                }}
-              >
-                {wallet.address}
-              </div>
-            </>
-          ) : isLoading ? (
-            <>
-              <p 
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#9ca3af',
-                  marginBottom: '0.75rem',
-                  margin: 0
-                }}
-              >
-                🔧 Generando tu wallet embebida...
-              </p>
-              <div 
-                style={{
-                  fontSize: '0.75rem',
-                  color: '#6b7280',
-                  fontFamily: 'monospace',
-                  background: 'rgba(17, 24, 39, 0.5)',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem',
-                  border: '1px solid rgba(31, 41, 55, 0.5)'
-                }}
-              >
-                Generando...
-              </div>
-            </>
-          ) : error ? (
-            <>
-              <p 
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#ef4444',
-                  marginBottom: '0.75rem',
-                  margin: 0
-                }}
-              >
-                ❌ Error al generar wallet
-              </p>
-              <div 
-                style={{
-                  fontSize: '0.75rem',
-                  color: '#ef4444',
-                  fontFamily: 'monospace',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem',
-                  border: '1px solid rgba(239, 68, 68, 0.3)'
-                }}
-              >
-                {error}
-              </div>
-            </>
-          ) : (
-            <>
-              <p 
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#9ca3af',
-                  marginBottom: '0.75rem',
-                  margin: 0
-                }}
-              >
-                Tu wallet embebida se genera automáticamente
-              </p>
-              <div 
-                style={{
-                  fontSize: '0.75rem',
-                  color: '#6b7280',
-                  fontFamily: 'monospace',
-                  background: 'rgba(17, 24, 39, 0.5)',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem',
-                  border: '1px solid rgba(31, 41, 55, 0.5)'
-                }}
-              >
-                Esperando...
-              </div>
-            </>
-          )}
-        </div>
+                {/* ChipiPay Wallet Info */}
+                <div
+                  style={{
+                    background: 'rgba(17, 24, 39, 0.8)',
+                    borderRadius: '0.75rem',
+                    padding: '1rem',
+                    border: '1px solid rgba(31, 41, 55, 0.5)',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                    {isConnected ? (
+                      <CheckCircle className="w-5 h-5" style={{ color: '#10b981' }} />
+                    ) : isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" style={{ color: '#a855f7' }} />
+                    ) : (
+                      <Wallet className="w-5 h-5" style={{ color: '#a855f7' }} />
+                    )}
+                    <span style={{ fontWeight: 600, color: '#ffffff' }}>Wallet</span>
+                  </div>
+
+                  {isConnected && wallet ? (
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: '#ffffff',
+                        fontFamily: 'monospace',
+                        background: 'rgba(31, 41, 55, 0.5)',
+                        borderRadius: '0.5rem',
+                        padding: '0.5rem',
+                        border: '1px solid rgba(55, 65, 81, 0.5)',
+                        wordBreak: 'break-all'
+                      }}
+                    >
+                      {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+                    </div>
+                  ) : isLoading ? (
+                    <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                      Conectando...
+                    </div>
+                  ) : (
+                    <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
+                      Sin wallet
+                    </div>
+                  )}
+                </div>
 
         {/* Disconnect Button */}
         <motion.button

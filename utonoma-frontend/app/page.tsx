@@ -10,10 +10,6 @@ import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { UserProfile } from "@/components/UserProfile";
 import { DiscoverPage } from "@/components/DiscoverPage";
 import { NotificationsPage } from "@/components/NotificationsPage";
-import { ChipiWalletSetup } from "@/components/ChipiWalletSetup";
-import { ChipiPayStatus } from "@/components/ChipiPayStatus";
-import { ChipiProviderDebug } from "@/components/ChipiProviderDebug";
-import { ChipiPayDebug } from "@/components/ChipiPayDebug";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Bell, User, Grid3x3, Video, TrendingUp, Users, BookOpen, Palette, Globe, Calculator, FlaskConical, Mail, Wallet } from "lucide-react";
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
@@ -514,24 +510,21 @@ export default function HomePage() {
       {/* Main Content */}
       <div className="pt-14 pb-20">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={view}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
-            className="container mx-auto px-4 max-w-lg"
-          >
-            {view === "feed" && (
-              <div className="space-y-6 py-4">
-                <ChipiPayDebug />
-                <ChipiWalletSetup />
-                <ChipiProviderDebug />
-                <ChipiPayStatus />
-                <WelcomeBonus />
-                <VideoFeed />
-              </div>
-            )}
+        <motion.div
+          key={view}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
+          className="container mx-auto px-4 max-w-lg"
+          style={{ paddingTop: '5rem', paddingBottom: '6rem' }}
+        >
+        {view === "feed" && (
+          <div className="space-y-6 py-4">
+            <WelcomeBonus />
+            <VideoFeed />
+          </div>
+        )}
             
             {view === "search" && <DiscoverPage />}
             {view === "upload" && <VideoUpload />}

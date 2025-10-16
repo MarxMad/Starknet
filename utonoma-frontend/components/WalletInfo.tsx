@@ -19,10 +19,18 @@ export function WalletInfo() {
 
   if (!isConnected || !wallet) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '0.5rem',
+        background: 'rgba(31, 41, 55, 0.3)',
+        borderRadius: '0.5rem',
+        padding: '0.375rem 0.75rem',
+        border: '1px solid rgba(55, 65, 81, 0.3)'
+      }}>
         <Wallet className="w-4 h-4" style={{ color: '#9ca3af' }} />
-        <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>
-          {isLoading ? 'Generando wallet...' : 'Sin wallet'}
+        <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
+          {isLoading ? 'Conectando...' : 'Sin wallet'}
         </span>
       </div>
     );
@@ -38,7 +46,7 @@ export function WalletInfo() {
         gap: '0.5rem',
         background: 'rgba(31, 41, 55, 0.5)',
         borderRadius: '0.5rem',
-        padding: '0.5rem 0.75rem',
+        padding: '0.375rem 0.75rem',
         border: '1px solid rgba(55, 65, 81, 0.5)',
         cursor: 'pointer',
         transition: 'all 0.3s ease'
@@ -54,7 +62,7 @@ export function WalletInfo() {
       }}
     >
       <Wallet className="w-4 h-4" style={{ color: '#a855f7' }} />
-      <span style={{ color: '#ffffff', fontSize: '0.875rem', fontFamily: 'monospace' }}>
+      <span style={{ color: '#ffffff', fontSize: '0.75rem', fontFamily: 'monospace' }}>
         {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
       </span>
       {copied ? (

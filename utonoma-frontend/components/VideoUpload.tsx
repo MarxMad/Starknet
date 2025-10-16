@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { useAccount } from "@starknet-react/core";
-import { config } from "@/lib/config";
-import { Loader2, CheckCircle, XCircle } from "lucide-react";
-import { Contract, shortString } from "starknet";
-import { motion } from "framer-motion";
+import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import platformAbi from "@/abis/platform.json";
+import { motion } from "framer-motion";
+import { Upload, X, CheckCircle, AlertCircle, Loader2, Video, FileText } from "lucide-react";
+import { useChipiWallet } from "@/hooks/useChipiWallet";
+import { useContract } from "@/hooks/useContract";
+import { shortString } from "starknet";
 
 export function VideoUpload() {
-  const { isConnected, account } = useAccount();
+  const { wallet, isConnected } = useChipiWallet();
+  const { uploadVideo, isLoading, error: contractError } = useContract();
+  
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -18,136 +19,156 @@ export function VideoUpload() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [showToast, setShowToast] = useState(false);
-  const toastTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [ipfsHash, setIpfsHash] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setError(null);
-    if (!acceptedFiles.length) return;
-    const selectedFile = acceptedFiles[0];
-    
-    // Validar tipo
-    if (!selectedFile.type.startsWith('video/')) {
-      setError('Solo se permiten archivos de video.');
-      setFile(null);
-      return;
+    const file = acceptedFiles[0];
+    if (file) {
+      setFile(file);
+      setError(null);
     }
-    
-    // Validar tamaño (100MB)
-    if (selectedFile.size > 100 * 1024 * 1024) {
-      setError('El archivo no debe superar los 100MB.');
-      setFile(null);
-      return;
-    }
-    
-    setFile(selectedFile);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'video/*': ['.mp4', '.mov', '.avi', '.webm']
+      'video/*': ['.mp4', '.mov', '.avi', '.mkv', '.webm']
     },
-    maxFiles: 1
+    maxFiles: 1,
+    maxSize: 100 * 1024 * 1024 // 100MB
   });
 
-  const uploadToIPFS = async (file: File): Promise<string> => {
-    // Subir a Pinata
+  const uploadToPinata = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('pinataMetadata', JSON.stringify({
+      name: file.name,
+      keyvalues: {
+        type: 'video',
+        platform: 'utonoma'
+      }
+    }));
 
-    // Usa variables de entorno
-    const apiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
-    const secretKey = process.env.NEXT_PUBLIC_PINATA_SECRET_KEY;
-
-    if (!apiKey || !secretKey) {
-      console.warn('Pinata keys not configured, using mock hash');
-      // Simular upload para demo
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return "QmMockHash" + Math.random().toString(36).substring(2, 15);
-    }
-
-    const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+    const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
       method: 'POST',
       headers: {
-        'pinata_api_key': apiKey,
-        'pinata_secret_api_key': secretKey
+        'pinata_api_key': process.env.NEXT_PUBLIC_PINATA_API_KEY!,
+        'pinata_secret_api_key': process.env.NEXT_PUBLIC_PINATA_SECRET_KEY!
       },
       body: formData
     });
 
-    if (!res.ok) {
-      throw new Error('Error al subir a IPFS/Pinata.');
+    if (!response.ok) {
+      throw new Error('Error subiendo a Pinata');
     }
 
-    const data = await res.json();
-    console.log('Respuesta de Pinata:', data);
-    return data.IpfsHash;
+    const result = await response.json();
+    return result.IpfsHash;
   };
 
   const handleUpload = async () => {
-    if (!file || !title || !isConnected || !account || error) return;
+    if (!file || !title.trim()) {
+      setError('Por favor selecciona un archivo y escribe un título');
+      return;
+    }
 
-    setUploading(true);
-    setUploadProgress(0);
-    setUploadStatus("uploading");
-    
+    if (!isConnected || !wallet) {
+      setError('Por favor conecta tu wallet para subir videos');
+      return;
+    }
+
     try {
-      // Barra de progreso simulada mientras sube
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20 + 10;
-        setUploadProgress(Math.min(progress, 70));
-        if (progress >= 70) {
-          clearInterval(interval);
-        }
+      setUploading(true);
+      setUploadStatus('uploading');
+      setError(null);
+      setUploadProgress(0);
+
+      // Simular progreso de subida
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
       }, 200);
 
-      // Upload to IPFS
-      const hash = await uploadToIPFS(file);
-      clearInterval(interval);
-      setUploadProgress(80);
+      // Subir a Pinata
+      console.log('📤 Subiendo a Pinata...');
+      const hash = await uploadToPinata(file);
+      setIpfsHash(hash);
+      setUploadProgress(90);
+
+      // Subir al contrato
+      console.log('📤 Subiendo al contrato...');
+      const titleFelt = shortString.encodeShortString(title);
+      const result = await uploadVideo(hash, titleFelt);
       
-      // Convert title and hash to felt252
-      const titleFelt = shortString.encodeShortString(title.slice(0, 31)); // Max 31 chars for felt252
-      const hashFelt = shortString.encodeShortString(hash.slice(0, 31));
-
-      // Call smart contract
-      const contract = new Contract(platformAbi, config.platformAddress, account);
-      await contract.upload_video(hashFelt, titleFelt);
-
+      clearInterval(progressInterval);
       setUploadProgress(100);
-      setUploadStatus("success");
-      setShowToast(true);
+      setUploadStatus('success');
       
-      if (toastTimeout.current) clearTimeout(toastTimeout.current);
-      toastTimeout.current = setTimeout(() => setShowToast(false), 3000);
+      console.log('✅ Video subido exitosamente:', result);
       
       // Reset form
       setTimeout(() => {
         setFile(null);
         setTitle("");
         setDescription("");
-        setUploadStatus("idle");
+        setUploadStatus('idle');
         setUploadProgress(0);
-      }, 3000);
+        setIpfsHash(null);
+      }, 2000);
+
     } catch (err) {
-      console.error("Upload error:", err);
-      setUploadStatus("error");
-      setError(err instanceof Error ? err.message : 'Error al subir el video');
+      console.error('❌ Error subiendo video:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setUploadStatus('error');
     } finally {
       setUploading(false);
     }
   };
 
-  if (!isConnected) {
+  if (!isConnected || !wallet) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-2xl mx-auto p-6 bg-card rounded-lg border text-center"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '3rem 1rem',
+          textAlign: 'center',
+          background: 'rgba(17, 24, 39, 0.5)',
+          borderRadius: '1rem',
+          border: '1px solid rgba(31, 41, 55, 0.5)',
+          margin: '1rem'
+        }}
       >
-        <p className="text-muted-foreground">Por favor conecta tu wallet para subir videos</p>
+        <AlertCircle className="w-16 h-16" style={{ color: '#ef4444', marginBottom: '1rem' }} />
+        <h3
+          style={{
+            fontSize: '1.25rem',
+            fontWeight: 700,
+            color: '#ffffff',
+            marginBottom: '0.5rem',
+            margin: 0
+          }}
+        >
+          Wallet Requerida
+        </h3>
+        <p
+          style={{
+            color: '#9ca3af',
+            margin: 0,
+            maxWidth: '20rem'
+          }}
+        >
+          Por favor conecta tu wallet para subir videos
+        </p>
       </motion.div>
     );
   }
@@ -156,154 +177,258 @@ export function VideoUpload() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto p-6 bg-card rounded-2xl border"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.5rem',
+        padding: '1rem',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.5) 0%, rgba(0, 0, 0, 0.8) 100%)'
+      }}
     >
-      <h2 className="text-2xl font-bold mb-6">📹 Subir Video</h2>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+        <h1
+          style={{
+            fontSize: '2rem',
+            fontWeight: 700,
+            color: '#ffffff',
+            marginBottom: '0.5rem',
+            margin: 0
+          }}
+        >
+          Subir Video
+        </h1>
+        <p
+          style={{
+            color: '#9ca3af',
+            margin: 0
+          }}
+        >
+          Comparte tu contenido y gana VERSY tokens
+        </p>
+      </div>
 
-      <div className="space-y-4">
-        {/* Title Input */}
+      {/* Upload Area */}
+      <div
+        {...getRootProps()}
+        style={{
+          border: '2px dashed',
+          borderColor: isDragActive ? '#a855f7' : '#374151',
+          borderRadius: '1rem',
+          padding: '2rem',
+          textAlign: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          background: isDragActive ? 'rgba(168, 85, 247, 0.1)' : 'rgba(17, 24, 39, 0.5)',
+          borderStyle: 'dashed'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = '#a855f7';
+          e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = '#374151';
+          e.currentTarget.style.background = 'rgba(17, 24, 39, 0.5)';
+        }}
+      >
+        <input {...getInputProps()} />
+        {file ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <Video className="w-12 h-12" style={{ color: '#a855f7' }} />
+            <div>
+              <p style={{ color: '#ffffff', fontWeight: 600, margin: 0 }}>
+                {file.name}
+              </p>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>
+                {(file.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setFile(null);
+              }}
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '0.5rem',
+                padding: '0.5rem',
+                color: '#ef4444',
+                cursor: 'pointer'
+              }}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <Upload className="w-12 h-12" style={{ color: '#9ca3af' }} />
+            <div>
+              <p style={{ color: '#ffffff', fontWeight: 600, margin: 0 }}>
+                {isDragActive ? 'Suelta el archivo aquí' : 'Arrastra tu video aquí'}
+              </p>
+              <p style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>
+                o haz clic para seleccionar
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Form Fields */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
-          <label htmlFor="title" className="block text-sm font-medium mb-2">
+          <label style={{ color: '#ffffff', fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>
             Título *
           </label>
           <input
-            id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Título del video (máx 31 caracteres)"
-            maxLength={31}
-            className="w-full px-4 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            disabled={uploading}
+            placeholder="Título de tu video"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              background: 'rgba(17, 24, 39, 0.5)',
+              border: '1px solid rgba(55, 65, 81, 0.5)',
+              borderRadius: '0.5rem',
+              color: '#ffffff',
+              fontSize: '1rem'
+            }}
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            {title.length}/31 caracteres
-          </p>
         </div>
 
-        {/* Description Input */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-2">
-            Descripción (opcional)
+          <label style={{ color: '#ffffff', fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>
+            Descripción
           </label>
           <textarea
-            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe tu video..."
             rows={3}
-            className="w-full px-4 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            disabled={uploading}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              background: 'rgba(17, 24, 39, 0.5)',
+              border: '1px solid rgba(55, 65, 81, 0.5)',
+              borderRadius: '0.5rem',
+              color: '#ffffff',
+              fontSize: '1rem',
+              resize: 'vertical'
+            }}
           />
         </div>
-
-        {/* Drag & Drop Zone */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Video *
-          </label>
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-              isDragActive
-                ? 'border-primary bg-primary/10'
-                : file
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
-            }`}
-          >
-            <input {...getInputProps()} disabled={uploading} />
-            {uploading && uploadStatus === "uploading" ? (
-              <div className="space-y-2">
-                <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
-                <div className="w-full bg-secondary rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Subiendo video... {Math.round(uploadProgress)}%
-                </p>
-              </div>
-            ) : file ? (
-              <div className="text-primary">
-                <CheckCircle className="h-8 w-8 mx-auto mb-2" />
-                <p className="font-medium">{file.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                </p>
-              </div>
-            ) : isDragActive ? (
-              <p className="text-primary">Suelta el video aquí...</p>
-            ) : (
-              <div className="space-y-2">
-                <div className="text-4xl">🎬</div>
-                <p className="text-muted-foreground">
-                  Arrastra y suelta un video aquí, o haz clic para seleccionar
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Formatos: MP4, MOV, AVI, WEBM • Máx 100MB
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-3 rounded-lg bg-red-500/10 border border-red-500/20"
-          >
-            <div className="flex items-center gap-2 text-red-500">
-              <XCircle className="h-4 w-4" />
-              <span className="text-sm">{error}</span>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Success Message */}
-        {uploadStatus === "success" && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-3 rounded-lg bg-green-500/10 border border-green-500/20"
-          >
-            <div className="flex items-center gap-2 text-green-500">
-              <CheckCircle className="h-4 w-4" />
-              <span className="text-sm">¡Video subido exitosamente!</span>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Upload Button */}
-        <button
-          onClick={handleUpload}
-          disabled={!file || !title || uploading || !!error}
-          className={`w-full py-3 rounded-lg font-bold text-lg transition-all ${
-            !file || !title || uploading || !!error
-              ? 'bg-secondary text-muted-foreground cursor-not-allowed'
-              : 'bg-primary text-primary-foreground hover:bg-primary/90 transform hover:scale-[1.02]'
-          }`}
-        >
-          {uploading ? '⏳ Publicando...' : '🚀 Publicar Video'}
-        </button>
       </div>
 
-      {/* Toast Notification */}
-      {showToast && (
+      {/* Upload Progress */}
+      {uploading && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#a855f7' }} />
+            <span style={{ color: '#ffffff', fontSize: '0.875rem' }}>
+              Subiendo video... {uploadProgress}%
+            </span>
+          </div>
+          <div
+            style={{
+              width: '100%',
+              height: '0.5rem',
+              background: 'rgba(17, 24, 39, 0.5)',
+              borderRadius: '0.25rem',
+              overflow: 'hidden'
+            }}
+          >
+            <div
+              style={{
+                width: `${uploadProgress}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #a855f7 0%, #3b82f6 100%)',
+                transition: 'width 0.3s ease'
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Status Messages */}
+      {uploadStatus === 'success' && (
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+            background: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            borderRadius: '0.5rem',
+            color: '#10b981'
+          }}
         >
-          ✅ ¡Video publicado con éxito!
+          <CheckCircle className="w-5 h-5" />
+          <span>¡Video subido exitosamente!</span>
         </motion.div>
       )}
+
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '1rem',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '0.5rem',
+            color: '#ef4444'
+          }}
+        >
+          <AlertCircle className="w-5 h-5" />
+          <span>{error}</span>
+        </motion.div>
+      )}
+
+      {/* Upload Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={handleUpload}
+        disabled={!file || !title.trim() || uploading}
+        style={{
+          width: '100%',
+          background: (!file || !title.trim() || uploading) 
+            ? 'rgba(55, 65, 81, 0.5)' 
+            : 'linear-gradient(90deg, #a855f7 0%, #3b82f6 100%)',
+          color: '#ffffff',
+          fontWeight: 600,
+          padding: '1rem',
+          borderRadius: '0.75rem',
+          border: 'none',
+          cursor: (!file || !title.trim() || uploading) ? 'not-allowed' : 'pointer',
+          fontSize: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem'
+        }}
+      >
+        {uploading ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Subiendo...
+          </>
+        ) : (
+          <>
+            <Upload className="w-5 h-5" />
+            Subir Video
+          </>
+        )}
+      </motion.button>
     </motion.div>
   );
 }
-

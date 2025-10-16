@@ -1,100 +1,179 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useAccount, useProvider } from "@starknet-react/core";
-import { Button } from "@/components/ui/Button";
-import { config, APP_CONFIG } from "@/lib/config";
-import { Gift, Loader2 } from "lucide-react";
-import { Contract } from "starknet";
-import platformAbi from "@/abis/platform.json";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Gift, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { useChipiWallet } from "@/hooks/useChipiWallet";
+import { useContract } from "@/hooks/useContract";
+import { APP_CONFIG } from "@/lib/config";
 
 export function WelcomeBonus() {
-  const { address, isConnected, account } = useAccount();
-  const { provider } = useProvider();
-  const [claiming, setClaiming] = useState(false);
+  const { wallet, isConnected } = useChipiWallet();
+  const { claimWelcomeBonus, hasClaimedWelcome, isLoading, error } = useContract();
+  
   const [claimed, setClaimed] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(true);
+  const [claiming, setClaiming] = useState(false);
 
-  const checkIfClaimed = useCallback(async () => {
-    if (!address || !provider) {
-      setLoading(false);
+  useEffect(() => {
+    const checkClaimed = async () => {
+      if (!isConnected || !wallet) {
+        setChecking(false);
+        return;
+      }
+
+      try {
+        setChecking(true);
+        const hasClaimed = await hasClaimedWelcome(wallet.address);
+        setClaimed(hasClaimed);
+      } catch (err) {
+        console.error('Error verificando bonus:', err);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkClaimed();
+  }, [isConnected, wallet, hasClaimedWelcome]);
+
+  const handleClaim = async () => {
+    if (!isConnected || !wallet) {
       return;
     }
 
     try {
-      const contract = new Contract(platformAbi, config.platformAddress, provider);
-      const hasClaimed = await contract.has_claimed_welcome(address);
-      setClaimed(Boolean(hasClaimed));
-    } catch (error) {
-      console.error("Error checking welcome bonus:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [address, provider]);
-
-  useEffect(() => {
-    checkIfClaimed();
-  }, [checkIfClaimed]);
-
-  const handleClaim = async () => {
-    if (!isConnected || !account || claiming || claimed) return;
-
-    try {
       setClaiming(true);
-      
-      const contract = new Contract(platformAbi, config.platformAddress, account);
-      await contract.claim_welcome_bonus();
-      
+      await claimWelcomeBonus();
       setClaimed(true);
-      await checkIfClaimed();
-    } catch (error) {
-      console.error("Claim error:", error);
-      // TODO: Show error toast
+      console.log('✅ Bonus reclamado exitosamente');
+    } catch (err) {
+      console.error('❌ Error reclamando bonus:', err);
     } finally {
       setClaiming(false);
     }
   };
 
-  if (!isConnected || claimed || loading) {
+  if (!isConnected || !wallet) {
     return null;
   }
 
-  return (
-    <div className="max-w-2xl mx-auto p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border-2 border-primary/20">
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-primary/20 rounded-full">
-          <Gift className="h-8 w-8 text-primary" />
+  if (checking) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+          borderRadius: '0.75rem',
+          padding: '1rem',
+          border: '1px solid rgba(168, 85, 247, 0.3)',
+          marginBottom: '1.5rem'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#a855f7' }} />
+          <span style={{ color: '#ffffff', fontSize: '0.875rem' }}>
+            Verificando bonus...
+          </span>
         </div>
-        
-        <div className="flex-1 space-y-3">
-          <div>
-            <h3 className="text-xl font-bold">Welcome to UTONOMA! 🎉</h3>
-            <p className="text-muted-foreground mt-1">
-              Claim your welcome bonus of <span className="font-bold text-primary">{APP_CONFIG.welcomeBonus} VERSY</span> tokens to get started!
-            </p>
-          </div>
+      </motion.div>
+    );
+  }
 
-          <Button
-            onClick={handleClaim}
-            disabled={claiming}
-            size="lg"
-            className="gap-2"
-          >
-            {claiming ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Claiming...
-              </>
-            ) : (
-              <>
-                <Gift className="h-4 w-4" />
-                Claim {APP_CONFIG.welcomeBonus} VERSY
-              </>
-            )}
-          </Button>
+  if (claimed) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+          borderRadius: '0.75rem',
+          padding: '1rem',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          marginBottom: '1.5rem'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <CheckCircle className="w-4 h-4" style={{ color: '#10b981' }} />
+          <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 500 }}>
+            ¡Bonus de bienvenida ya reclamado!
+          </span>
         </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+        borderRadius: '0.75rem',
+        padding: '1rem',
+        border: '1px solid rgba(168, 85, 247, 0.3)',
+        marginBottom: '1.5rem'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <Gift className="w-5 h-5" style={{ color: '#a855f7' }} />
+        <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>
+          ¡Bonus de Bienvenida!
+        </span>
       </div>
-    </div>
+
+      <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1rem', margin: 0 }}>
+        Reclama {APP_CONFIG.welcomeBonus} VERSY tokens como bonus de bienvenida
+      </p>
+
+      {error && (
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '0.5rem', 
+          marginBottom: '0.75rem',
+          color: '#ef4444',
+          fontSize: '0.875rem'
+        }}>
+          <AlertCircle className="w-4 h-4" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={handleClaim}
+        disabled={claiming || isLoading}
+        style={{
+          width: '100%',
+          background: 'linear-gradient(90deg, #a855f7 0%, #3b82f6 100%)',
+          color: '#ffffff',
+          fontWeight: 600,
+          padding: '0.75rem 1rem',
+          borderRadius: '0.5rem',
+          border: 'none',
+          cursor: (claiming || isLoading) ? 'not-allowed' : 'pointer',
+          fontSize: '0.875rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
+          opacity: (claiming || isLoading) ? 0.7 : 1
+        }}
+      >
+        {claiming || isLoading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Reclamando...
+          </>
+        ) : (
+          <>
+            <Gift className="w-4 h-4" />
+            Reclamar {APP_CONFIG.welcomeBonus} VERSY
+          </>
+        )}
+      </motion.button>
+    </motion.div>
   );
 }
-

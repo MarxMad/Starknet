@@ -24,98 +24,114 @@ export function Header() {
         boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.25)'
       }}
     >
-      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+      <div style={{ 
+        maxWidth: '80rem', 
+        margin: '0 auto', 
+        padding: '0.75rem 1rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        minHeight: '4rem'
+      }}>
+        {/* Logo */}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <div
+            style={{
+              width: '2.5rem',
+              height: '2.5rem',
+              background: 'linear-gradient(135deg, #2563eb 0%, #9333ea 100%)',
+              borderRadius: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.25rem',
+              boxShadow: '0 4px 12px -2px rgba(37, 99, 235, 0.25)'
+            }}
           >
-            <div 
-              style={{
-                width: '2rem',
-                height: '2rem',
-                background: 'linear-gradient(135deg, #2563eb 0%, #9333ea 100%)',
-                borderRadius: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1rem',
-                boxShadow: '0 4px 12px -2px rgba(37, 99, 235, 0.25)'
-              }}
-            >
-              🎬
-            </div>
-            <h1 
+            🎬
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+            <h1
               style={{
                 fontSize: '1.5rem',
                 fontWeight: 900,
                 color: '#ffffff',
                 margin: 0,
-                letterSpacing: '-0.025em'
+                letterSpacing: '-0.025em',
+                lineHeight: 1
               }}
             >
               UTONOMA
             </h1>
             {isSignedIn && (
-              <span 
+              <span
                 style={{
-                  fontSize: '0.75rem',
-                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.625rem',
+                  padding: '0.125rem 0.375rem',
                   background: 'linear-gradient(90deg, #2563eb 0%, #9333ea 100%)',
                   color: '#ffffff',
                   borderRadius: '9999px',
                   fontWeight: 600,
-                  boxShadow: '0 2px 8px -2px rgba(37, 99, 235, 0.25)'
+                  boxShadow: '0 2px 8px -2px rgba(37, 99, 235, 0.25)',
+                  alignSelf: 'flex-start'
                 }}
               >
                 Beta
               </span>
             )}
-          </motion.div>
+          </div>
+        </motion.div>
 
-          {/* User Button and Wallet Info */}
-          {isSignedIn ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <WalletInfo />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                style={{
-                  background: 'rgba(31, 41, 55, 0.5)',
-                  borderRadius: '0.75rem',
-                  padding: '0.25rem',
-                  border: '1px solid rgba(55, 65, 81, 0.5)',
-                  backdropFilter: 'blur(8px)'
-                }}
-              >
-                <UserButton 
-                  afterSignOutUrl="/"
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8",
-                      userButtonPopoverCard: "bg-gray-900 border-gray-700",
-                      userButtonPopoverActionButton: "text-gray-300 hover:text-white hover:bg-gray-800"
-                    }
-                  }}
-                />
-              </motion.div>
-            </div>
-          ) : (
-            <div 
+        {/* User Button and Wallet Info */}
+        {isSignedIn ? (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.75rem',
+            flexShrink: 0
+          }}>
+            <WalletInfo />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               style={{
-                color: '#9ca3af',
-                fontSize: '0.875rem',
                 background: 'rgba(31, 41, 55, 0.5)',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-                border: '1px solid rgba(55, 65, 81, 0.5)'
+                borderRadius: '0.75rem',
+                padding: '0.25rem',
+                border: '1px solid rgba(55, 65, 81, 0.5)',
+                backdropFilter: 'blur(8px)'
               }}
             >
-              No logueado
-            </div>
-          )}
-        </div>
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8",
+                    userButtonPopoverCard: "bg-gray-900 border-gray-700",
+                    userButtonPopoverActionButton: "text-gray-300 hover:text-white hover:bg-gray-800"
+                  }
+                }}
+              />
+            </motion.div>
+          </div>
+        ) : (
+          <div
+            style={{
+              color: '#9ca3af',
+              fontSize: '0.875rem',
+              background: 'rgba(31, 41, 55, 0.5)',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.5rem',
+              border: '1px solid rgba(55, 65, 81, 0.5)',
+              flexShrink: 0
+            }}
+          >
+            No logueado
+          </div>
+        )}
       </div>
     </motion.header>
   );
