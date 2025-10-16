@@ -22,11 +22,10 @@ export function useContract() {
 
     try {
       // Crear instancia del contrato
-      const contractInstance = new Contract(
-        CONTRACT_CONFIG.platformAbi,
-        CONTRACT_CONFIG.platformAddress,
-        provider
-      );
+      const contractInstance = new Contract({
+        abi: CONTRACT_CONFIG.platformAbi,
+        address: CONTRACT_CONFIG.platformAddress
+      });
 
       setContract(contractInstance);
       setError(null);
