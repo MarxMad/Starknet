@@ -27,7 +27,7 @@ export function VideoCard({ video, onLikeSuccess }: VideoCardProps) {
     try {
       setIsLiking(true);
       
-      const contract = new Contract(platformAbi, config.platformAddress);
+      const contract = new Contract(platformAbi);
       await contract.like_video(video.video_id);
       
       // Update local state
