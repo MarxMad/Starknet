@@ -23,12 +23,7 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
   ];
 
   const handleNavClick = (id: typeof navItems[number]["id"]) => {
-    if (id === "upload") {
-      setShowUploadMenu(true);
-      onViewChange(id);
-    } else {
-      onViewChange(id);
-    }
+    onViewChange(id);
   };
 
   return (
