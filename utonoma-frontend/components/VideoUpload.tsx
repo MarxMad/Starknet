@@ -96,7 +96,6 @@ export function VideoUpload() {
       // Subir a Pinata
       console.log('📤 Subiendo a Pinata...');
       const hash = await uploadToPinata(file);
-      setIpfsHash(hash);
       setUploadProgress(90);
 
       // Subir al contrato
@@ -117,7 +116,6 @@ export function VideoUpload() {
         setDescription("");
         setUploadStatus('idle');
         setUploadProgress(0);
-        setIpfsHash(null);
       }, 2000);
 
     } catch (err) {
