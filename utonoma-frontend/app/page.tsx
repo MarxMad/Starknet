@@ -10,6 +10,7 @@ import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { UserProfile } from "@/components/UserProfile";
 import { DiscoverPage } from "@/components/DiscoverPage";
 import { NotificationsPage } from "@/components/NotificationsPage";
+import { DemoMode } from "@/components/DemoMode";
 import { motion, AnimatePresence } from "framer-motion";
 import { Video, Mail, Wallet } from "lucide-react";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
@@ -20,6 +21,7 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<"feed" | "upload" | "profile" | "search" | "notifications">("feed");
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   // Removed activeTab state - no longer needed
 
   useEffect(() => {
@@ -29,6 +31,15 @@ export default function HomePage() {
     if (isSignedIn && !hasSeenOnboarding) {
       setShowOnboarding(true);
     }
+    
+    // Detectar si estamos en modo demo (sin contrato)
+    const checkDemoMode = () => {
+      const hasContract = process.env.NEXT_PUBLIC_PLATFORM_ADDRESS && 
+                         process.env.NEXT_PUBLIC_PLATFORM_ADDRESS !== "";
+      setIsDemoMode(!hasContract);
+    };
+    
+    checkDemoMode();
   }, [isSignedIn]);
 
   const completeOnboarding = () => {
@@ -521,8 +532,14 @@ export default function HomePage() {
         >
         {view === "feed" && (
           <div className="space-y-6 py-4">
-            <WelcomeBonus />
-            <VideoFeed />
+            {isDemoMode ? (
+              <DemoMode />
+            ) : (
+              <>
+                <WelcomeBonus />
+                <VideoFeed />
+              </>
+            )}
           </div>
         )}
             

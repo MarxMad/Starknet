@@ -22,10 +22,7 @@ export function useContract() {
 
     try {
       // Crear instancia del contrato
-      const contractInstance = new Contract({
-        abi: CONTRACT_CONFIG.platformAbi,
-        address: CONTRACT_CONFIG.platformAddress
-      });
+      const contractInstance = new Contract(CONTRACT_CONFIG.platformAbi.abi, CONTRACT_CONFIG.platformAddress);
 
       setContract(contractInstance);
       setError(null);
@@ -33,7 +30,7 @@ export function useContract() {
       console.error('Error creando contrato:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     }
-  }, [provider, isConnected, wallet?.address]); // Usar wallet?.address en lugar de wallet
+  }, [provider, isConnected]);
 
   const uploadVideo = async (ipfsHash: string, title: string) => {
     if (!contract || !account) {
@@ -156,6 +153,50 @@ export function useContract() {
     }
   };
 
+  const getCreatorRewards = async (creatorAddress: string) => {
+    if (!contract) {
+      throw new Error('Contrato no disponible');
+    }
+
+    try {
+      // Simular datos por ahora - en producción vendría del contrato
+      return {
+        totalEarned: 450,
+        pendingRewards: 120,
+        videosCount: 3,
+        totalLikes: 25
+      };
+    } catch (err) {
+      console.error('❌ Error obteniendo recompensas:', err);
+      throw err;
+    }
+  };
+
+  const claimCreatorRewards = async () => {
+    if (!contract || !account) {
+      throw new Error('Contrato o cuenta no disponible');
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('💰 Reclamando recompensas del creador...');
+
+      // Llamar al contrato
+      const result = await contract.claim_creator_rewards();
+      
+      console.log('✅ Recompensas reclamadas exitosamente:', result);
+      return result;
+    } catch (err) {
+      console.error('❌ Error reclamando recompensas:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     contract,
     isLoading,
@@ -166,6 +207,8 @@ export function useContract() {
     claimWelcomeBonus,
     getVideos,
     getVideo,
-    hasClaimedWelcome
+    hasClaimedWelcome,
+    getCreatorRewards,
+    claimCreatorRewards
   };
 }

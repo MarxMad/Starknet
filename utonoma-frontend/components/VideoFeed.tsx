@@ -14,65 +14,77 @@ export function VideoFeed() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const { provider } = useProvider();
 
   const loadVideos = useCallback(async () => {
-    if (!provider) return;
+    if (!provider || hasLoaded) return;
     
     try {
       setLoading(true);
       setError(false);
+      setHasLoaded(true);
       
       // Check if contract address is configured
-      if (!config.platformAddress) {
-        console.warn("Platform contract address not configured");
+      if (!config.platformAddress || config.platformAddress === "") {
+        console.warn("Platform contract address not configured - modo demo");
         setVideos([]);
+        setLoading(false);
         return;
       }
       
-      const contract = new Contract({
-        abi: platformAbi,
-        address: config.platformAddress
+      // Timeout para evitar bucles infinitos
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout loading videos')), 10000);
       });
       
-      // Get all video IDs
-      const videoIds = await contract.get_all_videos();
-      
-      // If no videos, show empty state
-      if (!videoIds || videoIds.length === 0) {
-        setVideos([]);
-        return;
-      }
-      
-      // Fetch each video's data
-      const videoPromises = videoIds.map(async (id: unknown) => {
-        try {
-          const videoData = await contract.get_video(id);
-          const videoId = String(id);
-          return {
-            video_id: videoId,
-            creator: videoData.creator.toString(),
-            ipfs_hash: videoData.ipfs_hash.toString(16),
-            title: videoData.title.toString(16),
-            likes: videoData.likes_count.toString(),
-            created_at: videoData.created_at.toString(),
-          };
-        } catch (err) {
-          console.error(`Error loading video ${String(id)}:`, err);
-          return null;
+      const fetchPromise = async () => {
+        const contract = new Contract(platformAbi.abi, config.platformAddress);
+        
+        // Get all video IDs
+        const videoIds = await contract.get_all_videos();
+        
+        // If no videos, show empty state
+        if (!videoIds || videoIds.length === 0) {
+          setVideos([]);
+          return;
         }
-      });
+        
+        // Fetch each video's data
+        const videoPromises = videoIds.map(async (id: unknown) => {
+          try {
+            const videoData = await contract.get_video(id);
+            const videoId = String(id);
+            return {
+              video_id: videoId,
+              creator: videoData.creator.toString(),
+              ipfs_hash: videoData.ipfs_hash.toString(16),
+              title: videoData.title.toString(16),
+              likes: videoData.likes_count.toString(),
+              created_at: videoData.created_at.toString(),
+            };
+          } catch (err) {
+            console.error(`Error loading video ${String(id)}:`, err);
+            return null;
+          }
+        });
+        
+        const loadedVideos = (await Promise.all(videoPromises))
+          .filter((v) => v !== null) as Video[];
+        setVideos(loadedVideos.reverse()); // Most recent first
+      };
       
-      const loadedVideos = (await Promise.all(videoPromises))
-        .filter((v) => v !== null) as Video[];
-      setVideos(loadedVideos.reverse()); // Most recent first
+      await Promise.race([fetchPromise(), timeoutPromise]);
+      
     } catch (err) {
       console.error("Error loading videos:", err);
       setError(true);
+      // En caso de error, mostrar estado vacío en lugar de fallar
+      setVideos([]);
     } finally {
       setLoading(false);
     }
-  }, [provider]);
+  }, [provider, hasLoaded]);
 
   useEffect(() => {
     loadVideos();

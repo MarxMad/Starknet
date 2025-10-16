@@ -1,5 +1,6 @@
-[
-  {
+{
+  "abi": [
+    {
     "name": "VersyPlatformImpl",
     "type": "impl",
     "interface_name": "versy_platform::versy_platform::IVersyPlatform"
@@ -243,4 +244,5 @@
       }
     ]
   }
-]
+  ]
+}

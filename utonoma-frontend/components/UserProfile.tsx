@@ -4,6 +4,7 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { User, Settings, LogOut, Coins, Video, Wallet, CheckCircle, Loader2 } from "lucide-react";
 import { useChipiWallet } from "@/hooks/useChipiWallet";
+import { CreatorRewards } from "./CreatorRewards";
 
 export function UserProfile() {
   const { user } = useUser();
@@ -319,6 +320,9 @@ export function UserProfile() {
           <span style={{ fontWeight: 600 }}>Desconectar</span>
         </motion.button>
       </div>
+
+      {/* Creator Rewards */}
+      <CreatorRewards />
     </motion.div>
   );
 }

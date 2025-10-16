@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { WalletInfo } from "./WalletInfo";
+import Image from "next/image";
 
 export function Header() {
   const { isSignedIn } = useUser();
@@ -42,16 +43,24 @@ export function Header() {
             style={{
               width: '2.5rem',
               height: '2.5rem',
-              background: 'linear-gradient(135deg, #2563eb 0%, #9333ea 100%)',
               borderRadius: '0.75rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.25rem',
+              overflow: 'hidden',
               boxShadow: '0 4px 12px -2px rgba(37, 99, 235, 0.25)'
             }}
           >
-            🎬
+            <Image
+              src="/UtonomaLogo.png"
+              alt="UTONOMA Logo"
+              width={40}
+              height={40}
+              style={{
+                objectFit: 'contain',
+                filter: 'brightness(1.1)'
+              }}
+            />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
             <h1

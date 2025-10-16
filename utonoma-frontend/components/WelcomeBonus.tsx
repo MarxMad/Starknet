@@ -6,6 +6,7 @@ import { Gift, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { useChipiWallet } from "@/hooks/useChipiWallet";
 import { useContract } from "@/hooks/useContract";
 import { APP_CONFIG } from "@/lib/config";
+import Image from "next/image";
 
 export function WelcomeBonus() {
   const { wallet, isConnected } = useChipiWallet();
@@ -14,27 +15,69 @@ export function WelcomeBonus() {
   const [claimed, setClaimed] = useState(false);
   const [checking, setChecking] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let isMounted = true;
+
     const checkClaimed = async () => {
-      if (!isConnected || !wallet) {
+      if (!isConnected || !wallet || hasChecked) {
         setChecking(false);
         return;
       }
 
       try {
         setChecking(true);
+        setHasChecked(true);
+        
+        // Timeout después de 3 segundos para evitar rate limiting
+        timeoutId = setTimeout(() => {
+          if (isMounted) {
+            console.log('⏰ Timeout verificando bonus - asumiendo no reclamado');
+            setClaimed(false);
+            setChecking(false);
+          }
+        }, 3000);
+
+        // Verificar si hay contrato configurado antes de hacer la llamada
+        if (!process.env.NEXT_PUBLIC_PLATFORM_ADDRESS || process.env.NEXT_PUBLIC_PLATFORM_ADDRESS === "") {
+          console.log('📝 No hay contrato configurado - modo demo');
+          if (isMounted) {
+            clearTimeout(timeoutId);
+            setClaimed(false);
+            setChecking(false);
+          }
+          return;
+        }
+
         const hasClaimed = await hasClaimedWelcome(wallet.address);
-        setClaimed(hasClaimed);
+        
+        if (isMounted) {
+          clearTimeout(timeoutId);
+          setClaimed(hasClaimed);
+          setChecking(false);
+        }
       } catch (err) {
         console.error('Error verificando bonus:', err);
-      } finally {
-        setChecking(false);
+        if (isMounted) {
+          clearTimeout(timeoutId);
+          // En caso de error, asumir que no está reclamado para permitir intentar
+          setClaimed(false);
+          setChecking(false);
+        }
       }
     };
 
     checkClaimed();
-  }, [isConnected, wallet, hasClaimedWelcome]);
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isConnected, wallet?.address]);
 
   const handleClaim = async () => {
     if (!isConnected || !wallet) {
@@ -116,7 +159,18 @@ export function WelcomeBonus() {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-        <Gift className="w-5 h-5" style={{ color: '#a855f7' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ width: '1.5rem', height: '1.5rem', position: 'relative' }}>
+            <Image
+              src="/UtonomaLogo.png"
+              alt="UTONOMA Logo"
+              width={24}
+              height={24}
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+          <Gift className="w-5 h-5" style={{ color: '#a855f7' }} />
+        </div>
         <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>
           ¡Bonus de Bienvenida!
         </span>

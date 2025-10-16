@@ -27,10 +27,10 @@ export function VideoCard({ video, onLikeSuccess }: VideoCardProps) {
     try {
       setIsLiking(true);
       
-      const contract = new Contract({
-        abi: platformAbi,
-        address: config.platformAddress
-      });
+      const contract = new Contract(platformAbi.abi, config.platformAddress);
+      
+      // Pagar por el like (esto se haría con el contrato real)
+      console.log(`💸 Pagando ${APP_CONFIG.likeReward} VERSY por dar like`);
       await contract.like_video(video.video_id);
       
       // Update local state
