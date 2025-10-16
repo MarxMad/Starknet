@@ -30,7 +30,10 @@ export function VideoFeed() {
         return;
       }
       
-      const contract = new Contract(platformAbi, config.platformAddress, provider);
+      const contract = new Contract({
+        abi: platformAbi,
+        address: config.platformAddress
+      });
       
       // Get all video IDs
       const videoIds = await contract.get_all_videos();
