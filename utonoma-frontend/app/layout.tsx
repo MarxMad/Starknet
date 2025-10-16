@@ -23,11 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <ChipiProvider
-        apiKey={process.env.NEXT_PUBLIC_CHIPI_API_KEY!}
-        secretKey={process.env.CHIPI_SECRET_KEY!}
-        environment={process.env.NEXT_PUBLIC_CHIPI_ENV === "production" ? "production" : "development"}
-      >
+      <ChipiProvider>
         <html lang="es" suppressHydrationWarning>
           <body className={inter.className}>
             <StarknetProvider>

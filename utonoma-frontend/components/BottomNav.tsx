@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Home, Search, Plus, Bell, User } from "lucide-react";
 import { motion } from "framer-motion";
